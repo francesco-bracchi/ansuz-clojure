@@ -19,13 +19,11 @@
               (~sc (first ~str) (next ~str) ~fl))))
 
 (defmacrop end []
-  (let [[str sc fl :as as] (map gensym '(str sc fl))
-        str1 (gensym 'str)]
+  (let [[str sc fl :as as] (map gensym '(str sc fl))]
     `(reflect ~(vec as)
-              (let [~str1 ~str1]
-                (if (empty? ~str1)
-                  (~sc true ~str1 ~fl)
-                  (~fl "not end" ~str1 ~sc))))))
+              (if (empty? ~str)
+                (~sc true ~str ~fl)
+                (~fl "not end" ~str ~sc)))))
 
 (defmacrop ! [v]
   (let [[str sc fl :as as] (map gensym '(str sc fl))
@@ -34,7 +32,7 @@
               (let [~v1 (first ~str)]
                 (if (= ~v ~v1)
                   (~sc ~v1 (rest ~str) ~fl)
-                  (~fl "get failed" ~str ~sc))))))
+                  (~fl ["get failed" :got ~v1 :expected ~v] ~str ~sc))))))
 
 (defmacrop ? [tst]
   (let [[str sc fl :as as] (map gensym '(str sc fl))
@@ -50,7 +48,7 @@
               (~sc ~str ~str ~fl))))
 
 ;; call with current continuation
-(defmacrop call/cc [p]
+(defmacrop callcc [p]
   (let [[str sc fl :as as] (map gensym '(str sc fl))
         pp (gensym 'p)]
     `(reify [~pp ~p]
@@ -58,7 +56,7 @@
          (~sc (with-args ~(vec as) (~pp ~sc)) ~str ~fl)))))
 
 ;; call with current failure
-(defmacrop call/cf [p]
+(defmacrop callcf [p]
   (let [[str sc fl :as as] (map gensym '(str sc fl))
         pp (gensym 'p)]
     `(reify [~pp ~p]

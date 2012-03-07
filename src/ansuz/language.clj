@@ -15,7 +15,7 @@
   (cond
    (empty? es)
    `(evalp ~e)
-   (and (seq? e) (= (first e) '=))
+   (and (seq? e) (= (first e) '<-))
    (let[[_ n m] e]`(bind [~n (evalp ~m)] (evalp (~'cat ~@es))))
    :else
    `(bind [ignore# (evalp ~e)] (evalp (~'cat ~@es)))))
@@ -96,8 +96,7 @@
 
 (defmacro run
   ([p src]
-     (let [r (gensym 'r)]
-       `(run ~p ~src #(throw (Error. %)))))
+     `(run ~p ~src #(throw (Error. %))))
   
   ([p src fail]
      (let[v (gensym 'v)

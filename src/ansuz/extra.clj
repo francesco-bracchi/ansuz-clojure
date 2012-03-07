@@ -1,6 +1,8 @@
 (ns ansuz.extra
+  (:refer-clojure :exclude [reify])
   (:use [ansuz.reflect])
   (:use [ansuz.monad])
+  (:use [ansuz.core :only [!]])
   (:use [ansuz.monadplus])
   (:use [ansuz.language]))
 
@@ -35,19 +37,23 @@
 ;;   `(reify (~mm (parser-eval ~m))
 ;;                 (orelse (parser-eval ~mm) (ret false))))
 
-(defmacrop ?? [m]
-  `(reify (~mm (parser-eval ~m))
-     (parser-eval (,~alt (~mm) (ret false)))))
+(defmacrop maybe [m]
+  (let[mm (gensym 'm)]
+  `(reify (~mm (evalp ~m))
+     (evalp (~'alt (~mm) (ret false))))))
 
-(defmacrop ** [m]
+(defmacrop many [m]
   (let[mm (gensym 'mm)
        kl (gensym 'kl)
        kl1 (gensym 'kl)
        es (gensym 'es)
        e  (gensym 'e)]
-    `(reify [~mm (parser-eval ~m)]
-       (parser-eval
-         (,~let [~kl (parser ~kl [~es] (alt (cat (= e (~mm)) (~kl (conj ~es ~e)))))]
+    `(reify [~mm (evalp ~m)]
+       (evalp
+         (~'let [~kl (parser ~kl [~es]
+                             (~'alt (~'cat (~'<- ~e (~mm))
+                                           (~kl (conj ~es ~e)))
+                                    (ret ~es)))]
            (~kl []))))))
 
 (defmacrop up [n m]
@@ -56,16 +62,15 @@
        e  (gensym 'e)
        es (gensym 'es)
        j  (gensym 'j)]
-    `(reify (~mm (parser-eval ~m))
-       (parser-eval
-         (,~let [~ut (parser ~ut [~j ~es]
+    `(reify (~mm (evalp ~m))
+       (evalp
+         (~'let [~ut (parser ~ut [~j ~es]
                              (~'if (= j 0) (ret ~es)
-                                   (~'alt (~'cat (~'= ~e (~mm))
+                                   (~'alt (~'cat (~'<- ~e (~mm))
                                                  (~ut (- ~j 1) (ocnj ~es ~e)))
-                                          (ret ~es))))))))))
+                                          (ret ~es))))])))))
 
-(defmacrop exact [s]
-  `(parser-eval (~'seq ~@(map #`(! %) s))))
+(defmacrop stringp [s]
+  `(evalp (~'cat ~@(map (fn [x] `(! ~x)) s))))
 
 
-     

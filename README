@@ -11,3 +11,11 @@ FIXME: write
 Copyright (C) 2012 FIXME
 
 Distributed under the Eclipse Public License, the same as Clojure.
+
+## TODO
+* check if using alternatives to CPS can be effective (like returning
+  an array) can be used to achieve higher performance
+* in expressions invent something better to pass parameters to the 
+  expr parser 
+* implement regular expressions to create fsm that can run in fixed
+  space time (use loop-recur)
