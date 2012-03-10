@@ -1,12 +1,12 @@
 (ns ansuz.expressions
   (:use [ansuz.core])
-  (:use [ansuz.monad])
   (:use [ansuz.language]))
 
 (defparser prefix* [ts]
   (if (empty? ts) (fail "prefix failed")
       (let[[parser prec] (first ts)]
-        (alt (cat (<- func (parser)) (ret [prec func]))
+        (alt (cat (<- func (parser))
+                  (ret [prec func]))
              (prefix* (rest ts))))))
 
 (defparser infix* [ts]

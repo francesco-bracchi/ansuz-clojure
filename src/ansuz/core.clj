@@ -1,7 +1,7 @@
 (ns ansuz.core
   (:refer-clojure :exclude [reify])
   (:use [ansuz.reflect])
-  (:use [ansuz.monad])
+  (:use [ansuz.monad :exclude [ret]])
   (:use [ansuz.monadplus]))
 
 (defmacrop fail [r]
@@ -9,9 +9,8 @@
     `(reflect ~(vec as)
               (~fl ~r ~str ~sc))))
 
-(defmacrop retv [w]
-  (let[[str sc fl :as as] (map gensym '(str sc fl))]
-    `(with-args ~(vec as) (ret ~w))))
+(defmacrop ret [w]
+  `(ansuz.monad/ret ~w))
 
 (defmacrop any []
   (let [[str sc fl :as as] (map gensym '(str sc fl))]
@@ -32,7 +31,7 @@
               (let [~v1 (first ~str)]
                 (if (= ~v ~v1)
                   (~sc ~v1 (rest ~str) ~fl)
-                  (~fl ["get failed" :got ~v1 :expected ~v] ~str ~sc))))))
+                  (~fl "! failed" ~str ~sc))))))
 
 (defmacrop ? [tst]
   (let [[str sc fl :as as] (map gensym '(str sc fl))
@@ -40,7 +39,7 @@
     `(reflect ~(vec as)
               (if (~tst (first ~str))
                 (~sc (first ~str) (rest ~str) ~fl)
-                (~fl "get test failed" ~str ~sc)))))
+                (~fl "? failed" ~str ~sc)))))
 
 (defmacrop in []
   (let [[str sc fl :as as] (map gensym '(str sc fl))]

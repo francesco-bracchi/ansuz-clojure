@@ -1,51 +1,19 @@
 (ns ansuz.extra
   (:refer-clojure :exclude [reify])
   (:use [ansuz.reflect])
-  (:use [ansuz.monad])
   (:use [ansuz.core :only [!]])
+  (:use [ansuz.monad])
   (:use [ansuz.monadplus])
   (:use [ansuz.language]))
 
-;; (defmacrop kleene [m]
-;;   (let[mm (gensym 'mm)
-;;        kl (gensym 'kl)
-;;        kl1 (gensym 'kl)
-;;        es (gensym 'es)
-;;        e  (gensym 'e)]
-;;     `(reify (~mm ~m)
-;;                   (parser-eval
-;;                    (:let [~kl1 (parser ~kl [~es]
-;;                                        (:or (:do (:= ~e (~mm)) (~kl (conj ~es ~e)))
-;;                                             (ret ~es)))]
-;;                          (~kl1 []))))))
-
-;; (defmacrop ** [m]
-;;   (let[mm (gensym 'mm)
-;;        kl (gensym 'kl)
-;;        kl1 (gensym 'kl)
-;;        es (gensym 'es)
-;;        e  (gensym 'e)]
-;;     `(reify (~mm ~m)
-;;                   (let [~kl (parser ~kl [~es]
-;;                                           (alt
-;;                                            ((do ((:= ~e (~mm)) (~kl (conj ~es ~e))))
-;;                                             (ret ~es))))]
-;;                              (~kl [])))))
-
-
-;; (defmacrop ?? [m]
-;;   `(reify (~mm (parser-eval ~m))
-;;                 (orelse (parser-eval ~mm) (ret false))))
-
 (defmacrop maybe [m]
   (let[mm (gensym 'm)]
-  `(reify (~mm (evalp ~m))
+    `(reify (~mm (evalp ~m))
      (evalp (~'alt (~mm) (ret false))))))
 
 (defmacrop many [m]
   (let[mm (gensym 'mm)
        kl (gensym 'kl)
-       kl1 (gensym 'kl)
        es (gensym 'es)
        e  (gensym 'e)]
     `(reify [~mm (evalp ~m)]
@@ -56,19 +24,22 @@
                                     (ret ~es)))]
            (~kl []))))))
 
-(defmacrop up [n m]
+(defmacrop up [m n]
   (let[mm (gensym 'mm)
-       ut (gensym 'ut)
-       e  (gensym 'e)
+       up (gensym 'up)
+       up1 (gensym 'up)
        es (gensym 'es)
-       j  (gensym 'j)]
-    `(reify (~mm (evalp ~m))
+       e  (gensym 'e)
+       j (gensym 'j)]
+    `(reify [~mm (evalp ~m)]
        (evalp
-         (~'let [~ut (parser ~ut [~j ~es]
-                             (~'if (= j 0) (ret ~es)
-                                   (~'alt (~'cat (~'<- ~e (~mm))
-                                                 (~ut (- ~j 1) (ocnj ~es ~e)))
-                                          (ret ~es))))])))))
+         (~'let [~up (parser ~up [~es ~j]
+                             (if (<= ~j 0)
+                               (ret ~es)
+                               (~'alt (~'cat (~'<- ~e (~mm))
+                                             (~up (conj ~es ~e) (- ~j 1)))
+                                      (ret ~es))))]
+           (~up [] ~n))))))
 
 (defmacrop stringp [s]
   `(evalp (~'cat ~@(map (fn [x] `(! ~x)) s))))

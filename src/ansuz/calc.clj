@@ -1,6 +1,5 @@
 (ns ansuz.calc
   (:use [ansuz.core])
-  (:use [ansuz.monad])
   (:use [ansuz.extra])
   (:use [ansuz.expressions :only [expr]])
   (:use [ansuz.language]))
