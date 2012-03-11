@@ -8,7 +8,8 @@
 
 (defparser spaces []
   (many (alt \space
-             \newline)))
+             \newline
+             \tab)))
 
 (defparser json-true []
   \t \r \u \e
@@ -21,7 +22,6 @@
 (defparser json-null []
   \n \u \l \l
   (ret nil))
-
 
 (defparser idigit []
   (alt (cat \0 (ret 0))
