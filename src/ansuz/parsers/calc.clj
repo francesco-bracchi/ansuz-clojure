@@ -1,4 +1,4 @@
-(ns ansuz.calc
+(ns ansuz.parsers.calc
   (:use [ansuz.core])
   (:use [ansuz.extra])
   (:use [ansuz.expressions :only [expr]])
@@ -124,17 +124,17 @@
   (alt (math-expr)
        (endp)))
 
-(defn calc [s]
+(defn parse [s]
   (run (calcp) s (fn [x] :fail)))
 
-(defn calc-repl []
+(defn repl []
   (map println
        ["press ctrl-D to exit"
         "avaible commands:"
         "+ - * / (? is the unary operator for quare)"])
   (loop []
     (print "? ")(flush)
-    (let[val (calc (read-line))]
+    (let[val (parse (read-line))]
       (cond
        (= val :fail)
        (do (print "not well formed expression\n")
