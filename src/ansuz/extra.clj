@@ -41,7 +41,19 @@
                                       (ret ~es))))]
            (~up [] ~n))))))
 
+(defmacrop times [m n]
+  (let[mm (gensym 'mm)
+       tm (gensym 'times)
+       es (gensym 'es)
+       e  (gensym 'e)
+       j (gensym 'j)]
+    `(reify [~mm (evalp ~m)]
+       (evalp
+         (~'let [~tm (parser ~tm [~es ~j]
+                             (if (= ~j 0) (ret ~es)
+                                 (~'cat (~'<- ~e (~mm))
+                                        (~tm (conj ~es ~e) (- ~j 1)))))]
+           (~tm [] ~n))))))
+
 (defmacrop stringp [s]
   `(evalp (~'cat ~@(map (fn [x] `(! ~x)) s))))
-
-
