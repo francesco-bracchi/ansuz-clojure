@@ -36,7 +36,7 @@ See src/ansuz/calc.clj as a full example of usage
 
 ** (in) 
    this special parser simply returns the input 
-   (run (in) "whatever") -> "whatever"
+   (run (cat (any) (in)) "whatever") -> [\h \a \t \e \v \e \r]
 
 * ansuz.language
   this module contains macros for creating, combining, running parsers
