@@ -133,7 +133,8 @@
         "avaible commands:"
         "+ - * / (? is the unary operator for quare)"])
   (loop []
-    (print "? ")(flush)
+    (print "? ")
+    (flush)
     (let[val (parse (read-line))]
       (cond
        (= val :fail)
