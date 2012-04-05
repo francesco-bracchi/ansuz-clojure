@@ -83,6 +83,18 @@
   \^
   (ret #(* % %)))
 
+(defn fact [n]
+  (loop [prod 1
+         counter 1]
+    (if (> counter n) prod
+        (recur (* counter prod)
+               (inc counter)))))
+               
+(defparser fac []
+  (many \space)
+  \!
+  (ret fact))
+
 ; priority table
 (def table
   {:prefix [[dif 1]]
@@ -90,7 +102,9 @@
            [dif 1 :left]
            [mul 2 :left]
            [div 2 :left]]
-   :postfix [[sqr 3]]
+   :postfix [[sqr 3]
+             [fac 3]
+             ]
    })
 
 (declare term)
@@ -145,4 +159,3 @@
        :else
        (do (print "=" val "\n")
            (recur))))))
-
