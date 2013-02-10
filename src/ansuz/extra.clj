@@ -9,7 +9,7 @@
 (defmacrop maybe [m]
   (let[mm (gensym 'm)]
     `(reify (~mm (evalp ~m))
-     (evalp (~'alt (~mm) (ret false))))))
+       (evalp (~'alt (~mm) (ret false))))))
 
 (defmacrop many [m]
   (let[mm (gensym 'mm)
@@ -24,7 +24,7 @@
                                     (ret ~es)))]
            (~kl []))))))
 
-(defmacrop up [m n]
+(defmacrop upto [n m]
   (let[mm (gensym 'mm)
        up (gensym 'up)
        up1 (gensym 'up)
@@ -41,7 +41,7 @@
                                       (ret ~es))))]
            (~up [] ~n))))))
 
-(defmacrop times [m n]
+(defmacrop times [n m]
   (let[mm (gensym 'mm)
        tm (gensym 'times)
        es (gensym 'es)
@@ -55,5 +55,22 @@
                                         (~tm (conj ~es ~e) (- ~j 1)))))]
            (~tm [] ~n))))))
 
-(defmacrop stringp [s]
-  `(evalp (~'cat ~@(map (fn [x] `(! ~x)) s))))
+(defmacrop at-least [n m]
+  (let[mm (gensym 'mm)
+       h  (gensym 'h)
+       t  (gensym 't)]
+    `(letpar [(~mm [] (evalp (~'cat ~m)))]
+             (evalp
+              (~'cat (~'<- ~h (times ~n (~mm)))
+                     (~'<- ~t (many (~mm)))
+                     (ret (concat ~h ~t)))))))
+
+(defmacrop at-least&most [n m p]
+  (let[mm (gensym 'mm)
+       h  (gensym 'h)
+       t  (gensym 't)]
+    `(letpar [(~~mm (evalp (~'cat ~p)))]
+             (evalp 
+              (~'cat (~'<- ~h (times ~n (~mm)))
+                     (~'<- ~t (upto (- ~m ~n) (~mm)))
+                     (ret (concat ~h ~t)))))))

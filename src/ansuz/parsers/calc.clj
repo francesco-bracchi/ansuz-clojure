@@ -47,16 +47,16 @@
        (<- i (intp))
        (ret (s i))))
 
-(defparser numb []
+(defparser number []
   (<- s (sign))
   (<- ip (intp))
   (<- fp (alt (frac) (ret 0)))
   (<- ex (alt (pow10) (ret 0)))
   (ret (s (* (+ ip fp) (Math/pow 10 ex)))))
 
-(defparser number []
-  (<- n (numb))
-  (ret n))
+;; (defparser number []
+;;   (<- n (numb))
+;;   (ret n))
 
 (defparser sum []
   (many \space)

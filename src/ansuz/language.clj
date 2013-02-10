@@ -88,11 +88,16 @@
 (defmacro defparser [n f & b]
   `(def ~n (parser ~f ~@b)))
 
-(defmacro letparser [v & b]
-  (let[mapfn (fn [[n f & b]] `(~n ~f (evalp (~'cat ~@b))))]
-    `(letpar
-      ~(vec (map mapfn v))
-      (evalp (~'cat ~@b)))))
+;; (defmacro letparser [v & b]
+;;   (let[mapfn (fn [[n f & b]] `(~n ~f (evalp (~'cat ~@b))))]
+    
+;;     (prn `(letpar
+;;            ~(vec (map mapfn v))
+;;            (evalp (~'cat ~@b))))
+
+;;     `(letpar
+;;       ~(vec (map mapfn v))
+;;       (evalp (~'cat ~@b)))))
 
 (defmacro run
   ([p src]

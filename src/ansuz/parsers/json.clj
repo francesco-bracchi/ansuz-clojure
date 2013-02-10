@@ -80,12 +80,18 @@
 
 (defparser hex []
   (alt (idigit)
-       (cat (alt \a \A) (ret 10))
-       (cat (alt \b \B) (ret 11))
-       (cat (alt \c \C) (ret 12))
-       (cat (alt \d \D) (ret 13))
-       (cat (alt \e \E) (ret 14))
-       (cat (alt \f \F) (ret 15))))
+       (cat \a (ret 10))
+       (cat \A (ret 10))
+       (cat \b (ret 11))
+       (cat \B (ret 11))
+       (cat \c (ret 12))
+       (cat \C (ret 12))
+       (cat \d (ret 13))
+       (cat \D (ret 13))
+       (cat \e (ret 14))
+       (cat \E (ret 14))
+       (cat \f (ret 15))
+       (cat \F (ret 15))))
        
 (defparser unicode-char []
   (<- [n0 n1 n2 n3] (times (hex) 4))

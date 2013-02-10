@@ -14,7 +14,7 @@
        `(fn ~s ~(vec (concat f as)) (with-args ~(vec as) ~b)))))
 
 (defmacro letpar [v b]
-  (let [mapfn (fn [n f b]
+  (let [mapfn (fn [[n f b]]
                 (let [as (map gensym '(str sc fl))]
                   `(~n ~(vec (concat f as)) (with-args ~(vec as) ~b))))
         as (map gensym '(str sc fl))]
