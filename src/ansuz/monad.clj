@@ -31,7 +31,7 @@
 
 (defmacrop ret [v]
   (let [[str sc fl :as as] (map gensym '(str sc fl))]
-    `(reflect ~(vec as) (~sc ~v ~str ~fl))))
+    `(reflect ~(vec as) #(~sc ~v ~str ~fl))))
 
 (defmacrop bind [[v m] n]
   (let [[str1 sc1 fl1 :as as1] (map gensym '(str sc fl))
@@ -41,6 +41,6 @@
     `(reify [~mm ~m]
        (reify [~nn ~n]
          (reflect ~(vec as1)
-           (~mm ~str1
-                (fn [~v ~str2 ~fl2] (~nn ~str2 ~sc1 ~fl2))
-                ~fl1))))))
+           #(~mm ~str1
+                 (fn [~v ~str2 ~fl2] (~nn ~str2 ~sc1 ~fl2))
+                 ~fl1))))))

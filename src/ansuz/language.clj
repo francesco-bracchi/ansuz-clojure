@@ -104,7 +104,7 @@
           [str sc fl] (map gensym '(str sc fl))
           _sc `(fn [~v ~str ~fl] ~v)
           _fl `(fn [~r ~str ~sc] (~fail ~r))]
-       `(with-args [ ~src ~_sc ~_fl] (evalp ~p)))))
+       `(trampoline (with-args [ ~src ~_sc ~_fl] (evalp ~p))))))
 
 (defmacro run-ndet [p src]
   (let[v (gensym 'v)
@@ -112,4 +112,4 @@
        [str sc fl] (map gensym '(str sc fl))
        _sc `(fn [~v ~str ~fl] (cons ~v (~fl 'restart)))
        _fl `(fn [~r ~str ~fl] ())]
-    `(with-args [~src ~_sc ~_fl] (evalp ~p))))
+    `(trampoline (with-args [~src ~_sc ~_fl] (evalp ~p)))))
