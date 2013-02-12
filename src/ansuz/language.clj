@@ -1,6 +1,6 @@
 (ns ansuz.language
   (:refer-clojure :exclude [reify])
-  (:use [ansuz.core :only [!]])
+  (:use [ansuz.core :only [! fail]])
   (:use [ansuz.reflect])
   (:use [ansuz.monad])
   (:use [ansuz.monadplus]))
@@ -51,15 +51,10 @@
              (with-args ~(vec as) (~rr))))))))
 
 (defn evalp-cond [& es]
-  (if (empty? es) `(fail "cond failed")
-      (let[[t? m & xs] es
-           as (map gensym '(str sc fl))
-           xx (gensym 'x)]
-        `(reify [~xx (evalp ~m)]
-           (reflect ~(vec as)
-             (if ~t?
-               (with-args ~(vec as) (~xx))
-               (evalp (cond ~@xs))))))))
+  (if (empty? es)
+    `(fail "cond failed")
+    (let[[t? m & xs] es]
+      `(evalp (~'if ~t? ~m (~'cond ~@xs))))))
 
 (def parser-operators
   {'cat   evalp-cat

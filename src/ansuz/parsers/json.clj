@@ -6,6 +6,12 @@
 
 (declare json-value)
 
+(defn between? [x lo hi]
+  (and (>= x lo) (<= x hi)))
+
+(defmacro macro-int [ch]
+  (int ch))
+
 (defparser spaces []
   (many (alt \space
              \newline
@@ -24,16 +30,11 @@
   (ret nil))
 
 (defparser idigit []
-  (alt (cat \0 (ret 0))
-       (cat \1 (ret 1))
-       (cat \2 (ret 2))
-       (cat \3 (ret 3))
-       (cat \4 (ret 4))
-       (cat \5 (ret 5))
-       (cat \6 (ret 6))
-       (cat \7 (ret 7))
-       (cat \8 (ret 8))
-       (cat \9 (ret 9))))
+  (<- c (? char?))
+  (let [i (int c)]
+    (if (between? i (macro-int \0) (macro-int \9)) 
+      (ret (- i (macro-int \0)))
+      (fail "not a decimal digit"))))
 
 (defparser int-more [c]
   (alt (cat (<- c1 (idigit))
@@ -79,19 +80,12 @@
   (ret n))
 
 (defparser hex []
-  (alt (idigit)
-       (cat \a (ret 10))
-       (cat \A (ret 10))
-       (cat \b (ret 11))
-       (cat \B (ret 11))
-       (cat \c (ret 12))
-       (cat \C (ret 12))
-       (cat \d (ret 13))
-       (cat \D (ret 13))
-       (cat \e (ret 14))
-       (cat \E (ret 14))
-       (cat \f (ret 15))
-       (cat \F (ret 15))))
+  (<- c (? char?))
+  (let [i (int c)]
+    (cond
+     (between? i (macro-int \a) (macro-int \f)) (- i (macro-int \a))
+     (between? i (macro-int \A) (macro-int \F)) (- i (macro-int \A))
+     (between? i (macro-int \0) (macro-int \9)) (- i (macro-int \0)))))
        
 (defparser unicode-char []
   (<- [n0 n1 n2 n3] (times (hex) 4))
@@ -99,16 +93,17 @@
   
 (defparser json-special-char []
   \\
-  (alt (cat \" (ret \"))
-       (cat \\ (ret \\))
-       (cat \/ (ret \/))
-       (cat \b (ret \backspace))
-       (cat \f (ret \formfeed))
-       (cat \n (ret \newline))
-       (cat \r (ret \return))
-       (cat \t (ret \tab))
-       (cat \u (unicode-char))
-       ))
+  (<- c (? char?))
+  (cond
+   (= c \") (ret \")
+   (= c \\) (ret \\)
+   (= c \/) (ret \/)
+   (= c \b) (ret \backspace)
+   (= c \f) (ret \formfeed)
+   (= c \n) (ret \newline)
+   (= c \r) (ret \return)
+   (= c \t) (ret \tab)
+   (= c \u) (unicode-char)))
 
 (defparser json-normal-char []
   (? (fn [c] (not (= c \")))))

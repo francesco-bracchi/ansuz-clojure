@@ -2,19 +2,8 @@
   (:use [ansuz.core])
   (:use [ansuz.extra])
   (:use [ansuz.expressions :only [expr]])
+  (:use [ansuz.parsers.json :only [idigit]])
   (:use [ansuz.language]))
-
-(defparser idigit []
-  (alt (cat \0 (ret 0))
-       (cat \1 (ret 1))
-       (cat \2 (ret 2))
-       (cat \3 (ret 3))
-       (cat \4 (ret 4))
-       (cat \5 (ret 5))
-       (cat \6 (ret 6))
-       (cat \7 (ret 7))
-       (cat \8 (ret 8))
-       (cat \9 (ret 9))))
 
 (defparser int-more [c]
   (alt (cat (<- c1 (idigit))
