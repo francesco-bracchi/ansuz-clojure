@@ -56,28 +56,25 @@
   (frac-more (/ 1 100) (/ d 10)))
 
 (defparser sign []
-  (alt (cat \+ (ret (fn [x] x)))
-       (cat \- (ret (fn [x] (- x))))
-       (ret (fn [x] x))))
+  (alt (cat \+ (ret +1))
+       (cat \- (ret -1))
+       (ret +1)))
 
 (defparser pow10 []
   (cat (alt \e \E)
        (<- s (sign))
        (<- i (intp))
-       (ret (s i))))
+       (ret (* s i))))
 
-(defparser numb []
+(defparser json-number []
   (<- s (sign))
   (<- ip (intp))
   (<- fp (alt (frac) (ret 0)))
   (<- ex (alt (pow10) (ret 0)))
-  (ret  (s (if (= 0 fp)
-             ip
-             (* (+ ip fp) (Math/pow 10 ex))))))
+  (ret  (* s (if (= 0 fp)
+               ip
+               (* (+ ip fp) (Math/pow 10 ex))))))
 
-(defparser json-number []
-  (<- n (numb))
-  (ret n))
 
 (defparser hex []
   (<- c (? char?))

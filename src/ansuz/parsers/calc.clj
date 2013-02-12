@@ -2,50 +2,10 @@
   (:use [ansuz.core])
   (:use [ansuz.extra])
   (:use [ansuz.expressions :only [expr]])
-  (:use [ansuz.parsers.json :only [idigit]])
+  (:use [ansuz.parsers.json :only [json-number]])
   (:use [ansuz.language]))
 
-(defparser int-more [c]
-  (alt (cat (<- c1 (idigit))
-            (int-more (+ c1 (* 10 c))))
-       (ret c)))
-
-(defparser intp []
-  (<- d (idigit))
-  (int-more d))
-
-(defparser frac-more [m c0]
-  (alt (cat (<- c (idigit))
-            (frac-more (/ m 10) (+ (* m c) c0)))
-       (ret c0)))
-
-(defparser frac []
-  \.
-  (<- d (idigit))
-  (frac-more (/ 1 100) (/ d 10)))
-
-
-(defparser sign []
-  (alt (cat \+ (ret (fn [x] x)))
-       (cat \- (ret (fn [x] (- x))))
-       (ret (fn [x] x))))
-
-(defparser pow10 []
-  (cat (alt \e \E)
-       (<- s (sign))
-       (<- i (intp))
-       (ret (s i))))
-
-(defparser number []
-  (<- s (sign))
-  (<- ip (intp))
-  (<- fp (alt (frac) (ret 0)))
-  (<- ex (alt (pow10) (ret 0)))
-  (ret (s (* (+ ip fp) (Math/pow 10 ex)))))
-
-;; (defparser number []
-;;   (<- n (numb))
-;;   (ret n))
+(def number json-number)
 
 (defparser sum []
   (many \space)
@@ -86,7 +46,7 @@
 
 ; priority table
 (def table
-  {:prefix [[dif 1]]
+  {:prefix [[dif 4]]
    :infix [[sum 1 :left]
            [dif 1 :left]
            [mul 2 :left]
