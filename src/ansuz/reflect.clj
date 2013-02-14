@@ -12,7 +12,8 @@
                   (seq (replace_ smap %))
                   (vector? %)
                   (vec (replace_ smap %))
-                  (map? %) %
+                  (map? %) (zipmap (replace_ smap (keys %))
+                                   (replace_ smap (vals %)))
                   :else %)
                 (replace smap coll)))]
     (replace_ (zipmap v x) b)))

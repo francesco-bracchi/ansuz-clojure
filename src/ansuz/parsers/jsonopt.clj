@@ -4,6 +4,13 @@
   (:use [ansuz.reflect :only [reflect]])
   (:use [ansuz.language]))
 
+;; this file is the same of json.clj, except some parsers are manually optimized,
+;; in particular string parser, and spaces.
+;; the problem is that it violates abstraction borders, therefore changes in 
+;; the underlying implementation can break this code.
+;; A better way for increasing performance could be feeding the parser with tokens
+;; that come from a lexer.
+
 (declare json-value)
 
 (defparser spaces []
@@ -84,12 +91,12 @@
                       st (rest st)]
                  (let[c (first st)]
                    (cond
-                    (not c) (fl "json string incomplete" st sc)
+                    (not c) (fl "json string incomplete")
                     (= c \") (sc (apply str s) (rest st) fl)
                     (= c \\)
                     (let [c (first st) st (rest st)]
                       (cond
-                       (not c) (fl "json string incomplete" sc fl)
+                       (not c) (fl "json string incomplete")
                        (= c \") (recur (conj s \") (rest st))
                        (= c \/) (recur (conj s \/) (rest st))
                        (= c \\) (recur (conj s \\) (rest st))
@@ -100,9 +107,9 @@
                        (= c \u) (let [x (apply str (take 4 (rest st)))
                                       v (char (.intValue (java.lang.Integer/valueOf x 16)))]
                                   (recur (conj s v) (drop 5 st)))
-                       :else (fl "unknow excape character" st sc)))
+                       :else (fl "unknow excape character")))
                     :else (recur (conj s c) (rest st)))))
-               (fl "not a string" st sc)))))
+               (fl "not a string")))))
 
 (defparser json-object-pairs [map]
   (<- k (json-string))

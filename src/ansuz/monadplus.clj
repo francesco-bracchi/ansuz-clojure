@@ -27,8 +27,6 @@
 ;; that works correctly.
 ;; For deterministic parsers the incorrect orelse is sufficient to describe any
 ;; parser.
-;; orelse* is the theorical (?)
-;; orelse is the pratical (?)
 
 (defmacrop orelse [m n]
   (let [[str1 sc1 fl1 :as as1] (map gensym '(str sc fl))
@@ -39,7 +37,7 @@
          (reflect ~as1
            (~mm ~str1
                 (fn [~vv ~str2 ~fl2] (~sc1 ~vv ~str2 ~fl1))
-                (fn [~rr ~str2 ~sc2] (~nn ~str1 ~sc1 ~fl1))))))))
+                (fn [~rr] (~nn ~str1 ~sc1 ~fl1))))))))
 
 (defmacrop orelse* [m n]
   (let [[str1 sc1 fl1 :as as1] (map gensym '(str sc fl))
@@ -50,7 +48,4 @@
          (reflect ~as1
            (~mm ~str1
                 ~sc1
-                (fn [~rr ~str2 ~sc2] (~nn ~str1 ~sc1 ~fl1))))))))
-
-
-        
+                (fn [~rr] (~nn ~str1 ~sc1 ~fl1))))))))

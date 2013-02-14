@@ -103,13 +103,13 @@
           r (gensym 'r)
           [str sc fl] (map gensym '(str sc fl))
           _sc `(fn [~v ~str ~fl] ~v)
-          _fl `(fn [~r ~str ~sc] (~fail ~r))]
+          _fl fail]
        `(trampoline (with-args [ ~src ~_sc ~_fl] (evalp ~p))))))
 
 (defmacro run-ndet [p src]
-  (let[v (gensym 'v)
-       r (gensym 'r)
-       [str sc fl] (map gensym '(str sc fl))
-       _sc `(fn [~v ~str ~fl] (cons ~v (~fl 'restart)))
-       _fl `(fn [~r ~str ~fl] ())]
-    `(trampoline (with-args [~src ~_sc ~_fl] (evalp ~p)))))
+     (let[v (gensym 'v)
+          r (gensym 'r)
+          [str sc fl] (map gensym '(str sc fl))
+          _sc `(fn [~v ~str ~fl] (lazy-seq (cons ~v (lazy-seq (trampoline ~fl nil)))))
+          _fl `(fn [~r] nil)]
+       `(lazy-seq (trampoline (with-args [ ~src ~_sc ~_fl] (evalp ~p))))))
