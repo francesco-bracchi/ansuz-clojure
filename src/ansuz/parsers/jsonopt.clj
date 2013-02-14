@@ -1,4 +1,4 @@
-(ns ansuz.parsers.json-opt
+(ns ansuz.parsers.jsonopt
   (:use [ansuz.core])
   (:use [ansuz.extra])
   (:use [ansuz.reflect :only [reflect]])

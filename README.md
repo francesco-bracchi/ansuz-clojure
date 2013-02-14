@@ -3,8 +3,16 @@ Ansuz is a library that builds a parser language on top of clojure. It makes
 an intensive use of macros, but uses monad combinatorial programming style.
 (see http://www.cs.indiana.edu/~jsobel/Parsing/explicit.html)
 
+## Note
+Because clojure doesn't support tail call optimization, the parser makes use
+of a trampoline, therefore do not return function from parsers. If you have to
+wrap them in another data structure, like [fn].
+
 ## Usage
-See src/ansuz/calc.clj as a full example of usage
+See src/ansuz/parsers/calc.clj or src/ansuz/parsers/json.clj as an example
+NOTE: in this document the input of the parser is always a string, but the
+generic type accepted by run is a collecction (i.e. something valid for 
+first and rest functions).
 
 * ansuz.core
   ansuz.core contains basic parsers elements
@@ -157,5 +165,4 @@ Distributed under the Eclipse Public License, the same as Clojure.
 
 ## TODO
 * write tests
-* move calc in examples
-* make more examples
+
