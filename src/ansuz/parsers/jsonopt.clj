@@ -118,7 +118,7 @@
   (spaces)
   (<- v (json-value))
   (spaces)
-  (let [new (assoc map k v)]
+  (let [new (assoc map (keyword k) v)]
     (alt (cat \, (spaces) (json-object-pairs new))
          (ret new))))
 

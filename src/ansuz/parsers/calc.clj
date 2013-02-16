@@ -32,7 +32,8 @@
   \^
   (ret #(* % %)))
 
-(defn fact [n]
+;; factorial of negative number is 1?
+(defn factorial [n]
   (loop [prod 1
          counter 1]
     (if (> counter n) prod
@@ -42,7 +43,7 @@
 (defparser fac []
   (many \space)
   \!
-  (ret fact))
+  (ret factorial))
 
 ; priority table
 (def table

@@ -41,6 +41,6 @@
     `(reify [~mm ~m]
        (reify [~nn ~n]
          (reflect ~(vec as1)
-           #(~mm ~str1
-                 (fn [~v ~str2 ~fl2] (~nn ~str2 ~sc1 ~fl2))
-                 ~fl1))))))
+           (fn [] (~mm ~str1
+                       (fn [~v ~str2 ~fl2] (~nn ~str2 ~sc1 ~fl2))
+                       ~fl1)))))))
