@@ -73,15 +73,44 @@
         (apply op (next e))
         e))))
 
-(defmacro parser [f & b]
-  (cond
-   (vector? f) 
-   `(par ~f (evalp (~'cat ~@b)))
-   (symbol? f)
-   `(par ~f ~(first b) (evalp (~'cat ~@(next b))))))
+(defn signature-with-evalp [sig]  
+  (let [[params & body] sig
+        conds (when (and (next body) (map? (first body)))
+                (first body))
+        body (if conds (next body) body)]
+    (if conds
+      `(~params ~conds (evalp (~'cat ~@body)))
+      `(~params (evalp (~'cat ~@body))))))
+
+(defmacro parser [& sigs]
+  (let [name (if (symbol? (first sigs)) (first sigs) nil)
+        sigs (if name (rest sigs) sigs)
+        sigs (if (vector? (first sigs)) (list sigs) sigs)
+        sigs (map signature-with-evalp sigs)]
+    (if name
+      `(par ~name ~@sigs)
+      `(par ~@sigs))))
+
+;; (defmacro parser [f & b]
+;;   (cond
+;;    (vector? f) 
+;;    `(par ~f (evalp (~'cat ~@b)))
+;;    (symbol? f)
+;;    `(par ~f ~(first b) (evalp (~'cat ~@(next b))))))
 
 (defmacro defparser [n f & b]
   `(def ~n (parser ~f ~@b)))
+
+(defmacro defparser [name & decl]
+  (let [pre (if (string? (first decl)) (list (first decl)) '())
+        decl (if (string? (first decl)) (next decl) decl)
+        pre (if (map? (first decl)) (concat pre (first decl)) pre)
+        decl (if (map? (first decl)) (next decl) decl)
+        decl (if (vector? (first decl)) (list decl) decl)
+        post (if (map? (last decl)) (list (last decl)) '())
+        decl (if (map? (last decl)) (butlast decl) decl)
+        decl (map signature-with-evalp decl)]
+    `(defpar ~name ~@(concat pre decl post))))
 
 ;; (defmacro letparser [v & b]
 ;;   (let[mapfn (fn [[n f & b]] `(~n ~f (evalp (~'cat ~@b))))]
