@@ -91,13 +91,6 @@
       `(par ~name ~@sigs)
       `(par ~@sigs))))
 
-;; (defmacro parser [f & b]
-;;   (cond
-;;    (vector? f) 
-;;    `(par ~f (evalp (~'cat ~@b)))
-;;    (symbol? f)
-;;    `(par ~f ~(first b) (evalp (~'cat ~@(next b))))))
-
 (defmacro defparser [n f & b]
   `(def ~n (parser ~f ~@b)))
 
@@ -111,17 +104,6 @@
         decl (if (map? (last decl)) (butlast decl) decl)
         decl (map signature-with-evalp decl)]
     `(defpar ~name ~@(concat pre decl post))))
-
-;; (defmacro letparser [v & b]
-;;   (let[mapfn (fn [[n f & b]] `(~n ~f (evalp (~'cat ~@b))))]
-    
-;;     (prn `(letpar
-;;            ~(vec (map mapfn v))
-;;            (evalp (~'cat ~@b))))
-
-;;     `(letpar
-;;       ~(vec (map mapfn v))
-;;       (evalp (~'cat ~@b)))))
 
 (defmacro run
   ([p src]

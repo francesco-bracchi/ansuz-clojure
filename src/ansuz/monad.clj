@@ -5,7 +5,8 @@
   (:refer-clojure :exclude [reify])
   (:use [ansuz.reflect]))
 
-(defn signature-with-args [as sig]
+(defn signature-with-args 
+  [as sig]
   (let [[params & body] sig
         params (vec (concat params as))
         conds (when (and (next body) (map? (first body)))
@@ -28,21 +29,6 @@
     (if name
       `(fn ~name ~@sigs)
       `(fn ~@sigs))))
-        
-
-    ;; (if (vector? (first sigs))
-    ;;   (let [[params & body] sigs]
-    ;;     (if name 
-    ;;       `(fn ~name ~(vec (concat params as)) (with-args ~(vec as) ~@body))
-    ;;       `(fn ~(vec (concat params as)) (with-args ~(vec as) ~@body))))
-    ;;   (let [sigs (map #(cons (vec (concat (first %) as)) (rest %)) sigs)]
-    ;;     (if name
-    ;;       `(fn ~name ,@sigs)
-    ;;       `(fn ,@sigs))))))
-    
-;; (defmacro defpar [n & rest] 
-;;   "`(defpar foo [x y] (bar) (baz)) == (def foo (par [x y] (bar) (baz)))`"
-;;   `(def ~n (par ~@rest)))
 
 (defmacro defpar [name & decl]
   (let [pre (if (string? (first decl)) (list (first decl)) nil)
