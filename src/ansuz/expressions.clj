@@ -1,8 +1,12 @@
+;; this namespace contains an utility parser used parsing expressions.
+;; for an example see **ansuz.parsers.calc**.
+;; the main entry point is `expr`.
 (ns ansuz.expressions
   (:use [ansuz.core])
   (:use [ansuz.language]))
 
-(defparser prefix* [ts]
+(defparser prefix* 
+  [ts]
   (if (empty? ts) (fail "prefix failed")
       (let[[parser prec] (first ts)]
         (alt (cat (<- func (parser))
