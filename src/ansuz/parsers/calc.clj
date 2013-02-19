@@ -1,3 +1,10 @@
+;; # Simple Calculator
+;; this is a simple mathmatical expression parser
+;; and this is a simple marginalia doc
+;;      (+ a b)
+;; 
+
+
 (ns ansuz.parsers.calc
   (:use [ansuz.core])
   (:use [ansuz.extra])
