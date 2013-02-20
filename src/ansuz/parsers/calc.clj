@@ -14,30 +14,45 @@
 
 (def number json-number)
 
-(defparser sum []
-  (many \space)
+(defparser spaces
+  "remove whitespaces"
+  []
+  (many \space))
+
+(defparser sum 
+  "recognize + infix operator, removing trailing whitespaces"
+  []
+  (spaces)
   \+
-  (ret +))
+  (ret [+]))
 
-(defparser dif []
-  (many \space)
+(defparser dif 
+  "recognize `-` prefix/infix operator, removing trailing whitespaces"
+  []
+  (spaces)
   \-
-  (ret -))
+  (ret [-]))
 
-(defparser mul []
-  (many \space)
+(defparser mul
+  "recognize `*` infix operator, removing trailing whitespaces"
+  []
+  (spaces)
   \*
-  (ret *))
+  (ret [*]))
 
-(defparser div []
-  (many \space)
+(defparser div
+  "recognize `-` infix operator, removing trailing whitespaces"
+  []
+  (spaces)
   \/
-  (ret /))
+  (ret [/]))
 
-(defparser sqr []
-  (many \space)
+(defparser sqr
+  "recognize `^` (squared) postfix operator, removing trailing whitespaces"
+  []
+  (spaces)
   \^
-  (ret #(* % %)))
+  (ret [#(* % %)]))
 
 ;; factorial of negative number is 1?
 (defn factorial [n]
@@ -47,12 +62,27 @@
         (recur (* counter prod)
                (inc counter)))))
                
-(defparser fac []
-  (many \space)
+(defparser fac 
+  "recognize `!` (factorial) postfix operator, removing trailing whitespaces"
+  []
+  (spaces)
   \!
-  (ret factorial))
+  (ret [factorial]))
 
-; priority table
+;; ##priority table
+;; this is the table that controls expression behavior:
+;;
+;;     <expression> ::= <term>
+;;                   |  '-' <expression>
+;;                   |  <expression> '+' <expression>
+;;                   |  <expression> '-' <expression>
+;;                   |  <expression> '*' <expression>
+;;                   |  <expression> '/' <expression>
+;;                   |  <expression> '^'
+;;                   |  <expression> '!'
+;;
+;; see **term** parser for <term> grammar
+;; the operator priority is provided by the second number.
 (def table
   {:prefix [[dif 4]]
    :infix [[sum 1 :left]
@@ -60,45 +90,64 @@
            [mul 2 :left]
            [div 2 :left]]
    :postfix [[sqr 3]
-             [fac 3]
-             ]
+             [fac 3]]
    })
 
 (declare term)
 
-(defparser pars []
+(defparser pars 
+  "parse an expression enclosed in parenthesis"
+  []
   \(
   (<- e (expr table term))
-  (many \space)
+  (spaces)
   \)
   (ret e))
 
-(defparser term []
-  (many \space)
+;; this is the parser passed to the **expr** parser provided by
+;; **ansuz.expression** namespace 
+;;
+;;     <term> -> <number> | '(' <expression> ')'
+;; 
+(defparser term 
+  "parse a term i.e. a number or a bracket enclosed expression"
+  []
+  (spaces)
   (alt (number)
        (pars)))
 
-(defparser math-expr []
+(defparser math-expr 
+  "parse a mathematical expression, remove whitespace, then this parser expect
+  the end of stream"
+  []
   (<- r (expr table term))
-  (many \space)
+  (spaces)
   (alt (end) (fail "end expected"))
   (ret r))
 
-(defparser endp []
-  (many \space)
+(defparser endp 
+  "recognize the `end` string as a single command"
+  []
+  (spaces)
   \e \n \d
-  (many \space)
+  (spaces)
   (end)
   (ret :end))
 
-(defparser calcp []
+(defparser calcp 
+  "recognize an expression or the `end` keyword"
+  []
   (alt (math-expr)
        (endp)))
 
-(defn parse [s]
+(defn parse 
+  "run the calc parser on charcter stream s (that can be, btw a string)"
+  [s]
   (run (calcp) s (fn [x] :fail)))
 
-(defn repl []
+(defn repl 
+  "start read eval print loop"
+  []
   (map println
        ["press ctrl-D to exit"
         "avaible commands:"

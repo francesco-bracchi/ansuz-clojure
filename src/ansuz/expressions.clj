@@ -9,20 +9,20 @@
   [ts]
   (if (empty? ts) (fail "prefix failed")
       (let[[parser prec] (first ts)]
-        (alt (cat (<- func (parser))
+        (alt (cat (<- [func] (parser))
                   (ret [prec func]))
              (prefix* (rest ts))))))
 
 (defparser infix* [ts]
   (if (empty? ts) (fail "infix failed")
       (let[[parser prec assoc] (first ts)]
-        (alt (cat (<- func (parser)) (ret [prec func assoc]))
+        (alt (cat (<- [func] (parser)) (ret [prec func assoc]))
              (infix* (rest ts))))))
 
 (defparser postfix* [ts]
   (if (empty? ts) (fail "postfix failed")
       (let[[parser prec] (first ts)]
-        (alt (cat (<- func (parser)) (ret [prec func]))
+        (alt (cat (<- [func] (parser)) (ret [prec func]))
              (postfix* (rest ts))))))
 
 (defparser prefix [op-table]
@@ -69,5 +69,9 @@
        (infix-expr-more p t0 op-table termp)
        (ret t0)))
 
-;; main
-(defparser expr [op-table termp] (expr* 0 op-table termp))
+(defparser expr 
+  "parse an expression according to the provided op-table (operator priority table)
+  and according to the termp parser (term parser)
+  see ansuz.parsers.calc for an usage example 
+  "
+  [op-table termp] (expr* 0 op-table termp))
