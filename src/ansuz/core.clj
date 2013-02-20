@@ -4,7 +4,7 @@
 ;; while bind and orelse are the way of combining them in a meaningful way.
 ;; see the ansuz.language as s DSL built on top of 
 ;; **ansuz.core**, **ansuz.monad**, **ansuz.monadplus**.
-
+;;
 (ns ansuz.core
   (:refer-clojure :exclude [reify])
   (:use [ansuz.reflect])
@@ -13,7 +13,8 @@
 
 (defmacrop fail 
   "this parser simply fails
-    (run (fail \"reason\") => Fail 
+
+    (run (fail \"reason\")) => Fail 
   
   "
   [r] 

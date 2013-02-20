@@ -1,10 +1,7 @@
 ;; # Simple Calculator
-;; this is a simple mathmatical expression parser
-;; and this is a simple marginalia doc
-;;      (+ a b)
+;; this is a simple mathematical expression parser.
+;; It supports +,-,*,/,^(squared),!(factorial) operators over float numbers.
 ;; 
-
-
 (ns ansuz.parsers.calc
   (:use [ansuz.core])
   (:use [ansuz.extra])

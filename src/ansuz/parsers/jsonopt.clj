@@ -1,15 +1,18 @@
+;; this is a json parser, meant as an example for a simple language
+;; that everybody knows.
+;; It behaves exacly as [ansuz.parsers.json](#ansuz.parsers.json) 
+;; but shows how to break monadic abstraction in order to achieve 
+;; more performance. in that case for string reading.
+;;
+;; BTW a better solution achieving greater performance would be 
+;; having a lexer before the ansuz parser, but the solution proposed
+;; is meant only as an example.
+;;
 (ns ansuz.parsers.jsonopt
   (:use [ansuz.core])
   (:use [ansuz.extra])
   (:use [ansuz.reflect :only [reflect]])
   (:use [ansuz.language]))
-
-;; this file is the same of json.clj, except some parsers are manually optimized,
-;; in particular string parser, and spaces.
-;; the problem is that it violates abstraction borders, therefore changes in 
-;; the underlying implementation can break this code.
-;; A better way for increasing performance could be feeding the parser with tokens
-;; that come from a lexer.
 
 (declare json-value)
 
@@ -154,11 +157,16 @@
        (json-null)
        (json-number)))
         
-(defparser json []
+(defparser json 
+  "that's the parser entry point."
+  []
   (spaces)
   (<- v (json-value))
   (spaces)
   (end)
   (ret v))
 
-(defn parse [s] (run (json) s))
+(defn parse 
+  "parse a stream of characters (a string is valid)"
+  [s] 
+  (run (json) s))

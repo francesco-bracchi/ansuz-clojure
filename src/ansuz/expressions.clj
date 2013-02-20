@@ -1,11 +1,41 @@
-;; this namespace contains an utility parser used parsing expressions.
-;; for an example see **ansuz.parsers.calc**.
-;; the main entry point is `expr`.
+;; # Expressions parser 
+;; Recursive descent parsers are known to be difficult for expressions with infix operators.
+;; this library amims simplifying the burden involved in it.
+;; There is an `expr` parser, to which can be passed 2 parameters, an operator priority table,
+;; and a term parser.
+;; The term parser parse atomic terms (or parenthesis surrounded expressions) while the 
+;; operator table provides a list of parsers with priority and associativity. This example taken
+;; from ansuz.parsers.calc shows priorities for standard arithmetic functions.
+;;
+;;     (def table
+;;       {:prefix [[dif 4]]
+;;        :infix [[sum 1 :left]
+;;                [dif 1 :left]
+;;                [mul 2 :left]
+;;                [div 2 :left]]
+;;        :postfix [[sqr 3]
+;;                  [fac 3]]
+;;        })
+;; 
+;; In this example `sum`, `dif` ... are parsers, with no input that returns a function in the form
+;; `(ret [(fn [a b] ...)])`. It is wrapped in a vector because if run by itself, like `(run (dif) "-")`
+;; if the function will not be wrapped it will generate an error because of trampoline called in running.
+;; for example:
+;;
+;;     (defparser dif 
+;;       []
+;;       (manu \space)
+;;       \-
+;;       (ret [-]))
+;;
+;; for an example see [ansuz.parsers.calc](#ansuz.parsers.calc).
+;; 
 (ns ansuz.expressions
   (:use [ansuz.core])
   (:use [ansuz.language]))
 
 (defparser prefix* 
+  "try to read a prefix operator amongst ts"
   [ts]
   (if (empty? ts) (fail "prefix failed")
       (let[[parser prec] (first ts)]
@@ -13,31 +43,42 @@
                   (ret [prec func]))
              (prefix* (rest ts))))))
 
-(defparser infix* [ts]
+(defparser infix* 
+  "try to read am infix operator amongst ts"
+  [ts]
   (if (empty? ts) (fail "infix failed")
       (let[[parser prec assoc] (first ts)]
         (alt (cat (<- [func] (parser)) (ret [prec func assoc]))
              (infix* (rest ts))))))
 
-(defparser postfix* [ts]
+(defparser postfix* 
+  "try to read am postfix operator amongst ts"
+  [ts]
   (if (empty? ts) (fail "postfix failed")
       (let[[parser prec] (first ts)]
         (alt (cat (<- [func] (parser)) (ret [prec func]))
              (postfix* (rest ts))))))
 
-(defparser prefix [op-table]
+(defparser prefix 
+  "try to parse a prefix operator according to op-table provided"
+  [op-table]
   (prefix* (:prefix op-table)))
 
-(defparser infix [op-table]
+(defparser infix 
+  "try to parse an infix operator according to op-table provided"
+  [op-table]
   (infix* (:infix op-table)))
 
-(defparser postfix [op-table]
+(defparser postfix 
+  "try to parse a postfix operator according to op-table provided"
+  [op-table]
   (postfix* (:postfix op-table)))
 
 (declare term)
 (declare expr-more)
 
-(defparser expr* [p op-table termp]
+(defparser expr* 
+  [p op-table termp]
   (<- t (term op-table termp))
   (expr-more p t op-table termp))
 
@@ -72,6 +113,6 @@
 (defparser expr 
   "parse an expression according to the provided op-table (operator priority table)
   and according to the termp parser (term parser)
-  see ansuz.parsers.calc for an usage example 
+  see ansuz.parsers.calc for an usage example.
   "
   [op-table termp] (expr* 0 op-table termp))

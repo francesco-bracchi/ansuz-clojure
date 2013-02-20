@@ -1,3 +1,5 @@
+;; this is a json parser, meant as an example for a simple language
+;; that everybody knows.
 (ns ansuz.parsers.json
   (:use [ansuz.core])
   (:use [ansuz.extra])

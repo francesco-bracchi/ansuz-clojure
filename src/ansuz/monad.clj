@@ -30,7 +30,12 @@
       `(fn ~name ~@sigs)
       `(fn ~@sigs))))
 
-(defmacro defpar [name & decl]
+(defmacro defpar 
+  "define a new global parser, the syntax resemble `defn`
+  do not use this direcly unless you know what you are doing, use 
+  ansuz.language/defparser instead
+  "
+  [name & decl]
   (let [pre (if (string? (first decl)) (list (first decl)) nil)
         decl (if (string? (first decl)) (next decl) decl)
         pre (if (map? (first decl)) (concat pre (first decl)) pre)

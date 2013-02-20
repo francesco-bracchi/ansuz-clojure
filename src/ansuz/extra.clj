@@ -6,12 +6,17 @@
   (:use [ansuz.monadplus])
   (:use [ansuz.language]))
 
-(defmacrop maybe [m]
+(defmacrop maybe 
+  "creates a macro that succeed or fails"
+  [m]
   (let[mm (gensym 'm)]
     `(reify (~mm (evalp ~m))
        (evalp (~'alt (~mm) (ret false))))))
 
-(defmacrop many [m]
+(defmacrop many
+  "input m is a parser expression, it matches 0 or more time m, 
+  returing a vector of results from m" 
+  [m]
   (let[mm (gensym 'mm)
        kl (gensym 'kl)
        es (gensym 'es)
@@ -24,7 +29,10 @@
                                     (ret ~es)))]
            (~kl []))))))
 
-(defmacrop upto [n m]
+(defmacrop upto
+  "input m is a parser expression, it matches 0 upto n times m, 
+  returing a vector of results from m"
+ [n m]
   (let[mm (gensym 'mm)
        up (gensym 'up)
        up1 (gensym 'up)
@@ -41,7 +49,10 @@
                                       (ret ~es))))]
            (~up [] ~n))))))
 
-(defmacrop times [n m]
+(defmacrop times
+  "input m is a parser expression, it matches exactly n times m, 
+  returing a vector of results from m" 
+  [n m]
   (let[mm (gensym 'mm)
        tm (gensym 'times)
        es (gensym 'es)
@@ -55,7 +66,9 @@
                                         (~tm (conj ~es ~e) (- ~j 1)))))]
            (~tm [] ~n))))))
 
-(defmacrop at-least [n m]
+(defmacrop at-least
+  "matches at least n times m, synonym of `(cat (times n <m>) (many <m>))`"
+  [n m]
   (let[mm (gensym 'mm)
        h  (gensym 'h)
        t  (gensym 't)]
@@ -65,7 +78,10 @@
                      (~'<- ~t (many (~mm)))
                      (ret (concat ~h ~t)))))))
 
-(defmacrop at-least&most [n m p]
+(defmacrop at-least&most
+  "matches at least n times m but no more than m,
+  synonym of `(cat (times n <p>) (upto (- m n) <p>))`"
+  [n m p]
   (let[mm (gensym 'mm)
        h  (gensym 'h)
        t  (gensym 't)]
