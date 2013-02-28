@@ -174,7 +174,7 @@ It's like many except limits the maximum of repetions to <num>
   with infix/prefix/postfix priority table.
 
 ### `(expr <op-table> <term>)`
-  <op-table> is a clojure map with 3 keys, this is for example the one you 
+  `<op-table>` is a clojure map with 3 keys, this is for example the one you 
   can find in calc.
  
     {:prefix [[dif 1]]
