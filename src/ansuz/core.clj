@@ -27,51 +27,6 @@
   [w]
   `(ansuz.monad/ret ~w))
 
-(defmacrop any 
-  "reads any kind of input token, consumes and returns it.
-  it fails only in case the stream is at an end.
-
-    (run (any) \"\") => Fail
-    (run (any) \"a\") => the 'a' character
-  
-  It returns the next token.
-  "
-  []
-  (let [[str sc fl :as as] (map gensym '(str sc fl))]
-    `(reflect ~(vec as)
-              (if (empty? ~str)
-                (fn [] (~fl "any failed (end of stream"))
-                (fn [] (~sc (first ~str) (next ~str) ~fl))))))
-
-(defmacrop end 
-  "if success only if the stream is completely consumed
-
-    (run (end) \"\") => true
-    (run (end) \"a\") => raise an error
-  "
-  []
-  (let [[str sc fl :as as] (map gensym '(str sc fl))]
-    `(reflect ~(vec as)
-              (if (empty? ~str)
-                (fn [] (~sc true ~str ~fl))
-                (fn [] (~fl "not end"))))))
-
-(defmacrop ! 
-  "recognize exatly one token, i.e. it is true that 
-
-    (run (! x) (str a b c))
-
-  if and only if `(= x a)` returns true. The result is a.
-  "
-  [v]
-  (let [[str sc fl :as as] (map gensym '(str sc fl))
-        v1 (gensym 'v)]
-    `(reflect ~(vec as)
-              (let [~v1 (first ~str)]
-                (if (= ~v ~v1)
-                  (fn [] (~sc ~v1 (rest ~str) ~fl))
-                  (fn [] (~fl "! failed")))))))
-
 (defmacrop ? 
   "Takes in input a function, and is successful if the result of the 
   application of the function to the next token is true.
@@ -83,12 +38,45 @@
   "
   [tst]
   (let [[str sc fl :as as] (map gensym '(str sc fl))
+        resume (gensym 'resume)
         v1 (gensym 'v)]
     `(reflect ~(vec as)
-              (if (~tst (first ~str))
-                (fn [] (~sc (first ~str) (rest ~str) ~fl))
-                (fn [] (~fl "? failed"))))))
+              (letfn[(~resume [~str]
+                       (cond
+                        (empty? ~str) (fn [] (~fl ~resume))
+                        (~tst (first ~str)) (fn [] (~sc (first ~str) (rest ~str) ~fl))
+                        :else (fn [] (~fl "? failed"))))]
+                (~resume ~str)))))
 
+(defmacrop any 
+  "reads any kind of input token, consumes and returns it.
+  it fails only in case the stream is at an end.
+
+    (run (any) \"\") => Fail
+    (run (any) \"a\") => the 'a' character
+  
+  It returns the next token.
+  "
+  []
+  (let [f (gensym 'f)]
+    `(? (fn [~f] (not (= ~f ,(char 0)))))))
+
+(defmacrop ! 
+  "recognize exatly one token, i.e. it is true that 
+
+    (run (! x) (str a b c))
+
+  if and only if `(= x a)` returns true. The result is a.
+  "
+  [v]
+  (let [f (gensym 'f)]
+    `(? (fn [~f] (= ~f ~v)))))
+
+(defmacrop end
+  "By default run adds a null `(char 0)` at the end of a stream"
+  []
+  `(! ,(char 0)))
+  
 (defmacrop in 
   "This is meant to be an inspection tool, this parser always succeed and 
    returns the rest of the input token stream.

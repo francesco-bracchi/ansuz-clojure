@@ -41,6 +41,7 @@
   (:use [ansuz.core :only [! fail]])
   (:use [ansuz.reflect])
   (:use [ansuz.monad])
+  (:use [clojure.pprint])
   (:use [ansuz.monadplus]))
 
 (defn evalp-cat 
@@ -166,7 +167,8 @@
           [str sc fl] (map gensym '(str sc fl))
           _sc `(fn [~v ~str ~fl] ~v)
           _fl fail]
-       `(trampoline (with-args [ ~src ~_sc ~_fl] (evalp ~p))))))
+       `(let [~str (str ~src ,(char 0))]
+          (trampoline (with-args [~str ~_sc ~_fl] (evalp ~p)))))))
 
 (defmacro run-ndet
   "that's the same of run but returns a lazy sequence, that contains the 
@@ -178,4 +180,30 @@
        [str sc fl] (map gensym '(str sc fl))
        _sc `(fn [~v ~str ~fl] (lazy-seq (cons ~v (lazy-seq (trampoline ~fl nil)))))
        _fl `(fn [~r] nil)]
-    `(lazy-seq (trampoline (with-args [ ~src ~_sc ~_fl] (evalp ~p))))))
+    `(lazy-seq (trampoline (with-args [(str ~src ,(char 0))  ~_sc ~_fl] (evalp ~p))))))
+
+;; (defmacro nur 
+;;   "Consider the case of an evented I/O. New data arrives from time to time 
+;;   and has to be sent to the parser. With the traditional approach the symbol sequence
+;;   that is set as input of the parser, has to be suspended waiting for new data.
+  
+;;   This macro instead resolve to a function that receive new data that is parsed, 
+;;   till it is possible, then waits for new data, that can be fed again
+;;   "
+;;   ([p]
+;;      `(nur ~p #(throw (Error. %))))
+;;   ([p fail]
+;;      (let [d (gensym 'd)
+;;            s (gensym 's)
+;;            str ""
+;;            sc (let [fp (map gensym '(v str fl))] 
+;;                 `(fn ~fp false))
+;;            fl (let [v (gensym 'v)] 
+;;                 `(fn [~v] 
+;;                    (if (fn? ~v) 
+;;                      (fn 
+;;                        ([] (~v (str (char 0))))
+;;                        ([~s] (~v ~s)))
+;;                      (~fail ~v))))]
+;;        `(trampoline (with-args [~str ~sc ~fl] (evalp ~p))))))
+
