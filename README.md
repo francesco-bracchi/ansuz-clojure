@@ -1,20 +1,31 @@
 # ansuz
+
 Ansuz is a library that builds a parser language on top of clojure. It makes
 an intensive use of macros, but uses monad combinatorial programming style.
 (see http://www.cs.indiana.edu/~jsobel/Parsing/explicit.html)
 
 ## Note
+
 Because clojure doesn't support tail call optimization, the parser makes use
 of a trampoline, therefore do not return function from parsers. If you have to
 wrap them in another data structure, like `[fn]`.
 
+Another solution is to wrap the function in a 'false function' i.e. an object
+that implements IFn interface
+
+     (defn fn->ifn [fun]
+       (proxy [clojure.lang.IFn] []
+         (invoke [s] (fun s))))
+
 ## Usage
+
 See src/ansuz/parsers/calc.clj or src/ansuz/parsers/json.clj as an example
 NOTE: in this document the input of the parser is always a string, but the
 generic type accepted by run is a collecction (i.e. something valid for 
 first and rest functions).
 
 ## ansuz.core
+
 ansuz.core contains basic parsers elements
 
 ### `(fail <reason>)`
@@ -179,9 +190,9 @@ It's like many except limits the maximum of repetions to <num>
  
     {:prefix [[dif 1]]
       :infix [[sum 1 :left]
-             [dif 1 :left]
-             [mul 2 :left]
-             [div 2 :left]]
+              [dif 1 :left]
+              [mul 2 :left] 
+              [div 2 :left]]
      :postfix [[sqr 3]]}
 
    The first element is a parser, that parses the operator.  The second is the
